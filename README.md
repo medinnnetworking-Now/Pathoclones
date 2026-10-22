@@ -2,15 +2,17 @@
 
 Interactive, evidence-linked organ models for clinical learning. The first model is the **breast**, built for Breast Cancer Awareness Month.
 
-The organ is drawn as readable anatomy (duct tree, lobules, skin and adipose envelope, nipple, axillary nodes). Each lobule's colour and size shows the state of the clone living in it. The backdrop and UI take their look from Webb-style nebulae and stellar telemetry.
+A pixel-art game on top of an evidence-linked simulation. Each tile on the board is a lobule of breast tissue. A clone of abnormal cells grows from one tile, colour-coded by stage (blue normal, gold hyperplasia, orange atypia, magenta DCIS, crimson invasive). Your habits change how fast it grows or whether it fades.
 
-## What it teaches
+## How it plays
 
-- **Clonal evolution:** normal tissue, hyperplasia, atypia, DCIS and invasive carcinoma are modeled as nested clones that compete, advance and can go extinct.
-- **Decisions change the environment:** alcohol, activity, BMI, fiber, soy, hormone therapy and screening feed a tissue model (inflammation, estrogenic drive, proliferation, genomic stability, immune surveillance). Habits are integrated over months, not applied instantly.
-- **Reversal window:** early lesions regress only when proliferative drive falls well below the reference level. In situ and invasive disease do not regress through lifestyle in this model; they need clinical treatment.
-- **Timeline branching:** scrub back, change a lever and the future re-runs from that point.
-- **Cohort view:** 600 simulated lives under your decisions vs the reference lifestyle, with shared random seeds.
+- Pick a level (Rookie, Warrior, Legend) and press play. One simulated year passes every second or so.
+- Five habit cards: drinks, movement, weight, plate (fiber and soy) and scans. Change them at any time.
+- **Risk radar:** one bar for how likely new clones are, one for growth pressure. When growth pressure drops below the line, early clones enter the shrink zone and can fade.
+- **Tumor growth ladder:** tile counts per stage, with tumor size in mm once invasive.
+- **Life chart:** bars for clone size over age, dots for your evolving risk.
+- Points reward healthy years, the shrink zone, clones that fade and early detection. Late detection and spread cost points. Each level ends with a grade.
+- Every habit has a `?` button with a plain-language reason and the PubMed sources behind it.
 
 ## Evidence policy
 
@@ -45,15 +47,12 @@ npm test           # engine tests (calibration, determinism, snapshot branching,
 npm run build
 ```
 
-Add `?debug` to the URL to expose `window.__pc` (scene and controller) for inspection.
-
 ## Layout
 
 ```
 src/sim/     engine, RNG, timeline controller, cohort runner
 src/data/    evidence registry (PubMed-verified)
-src/scene/   procedural anatomy, shaders, Three.js scene
-src/ui/      panels and configuration
+src/game/    levels, scoring rules, pixel board, pixel nebula, UI components
 tests/       node:test suite
 ```
 
