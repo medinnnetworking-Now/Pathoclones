@@ -42,6 +42,20 @@ export function Story({ steps, index, onIndex, label, onMore }) {
         </div>
         <p className="clinical mono">{s.clinical}</p>
         <p className="body">{s.body}</p>
+        {s.videos && (
+          <ul className="videos">
+            {s.videos.map((v) => (
+              <li key={v.url}>
+                <a href={v.url} target="_blank" rel="noreferrer">
+                  <span className="mono">{v.org}</span>
+                  <b>{v.title}</b>
+                  <em aria-hidden="true">Watch</em>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+        {s.embed && <div className="embed"><iframe src={s.embed} title={s.clinical} allow="encrypted-media; picture-in-picture" allowFullScreen loading="lazy" /></div>}
         <div className="controls">
           <button className="pill" onClick={() => onIndex(index - 1)} disabled={index === 0} aria-label="Previous stage">Back</button>
           <button className="pill ghost" onClick={onMore}>Learn more</button>

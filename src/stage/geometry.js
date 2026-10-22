@@ -469,3 +469,19 @@ export function buildHelix() {
   }
   return L.geometry();
 }
+
+export function buildSpiral() {
+  const L = new Lines();
+  const C = BREAST_C(AFFECTED_SIDE);
+  const A = 0.125, D = 0.095;
+  const pts = [];
+  const N = 220, turns = 3.2;
+  for (let k = 0; k <= N; k++) {
+    const t = k / N;
+    const r = 0.04 + t * 0.93;
+    const ph = t * turns * Math.PI * 2;
+    pts.push([C[0] + Math.cos(ph) * r * A, C[1] + Math.sin(ph) * r * A * 0.97, C[2] + Math.sqrt(Math.max(0, 1 - r * r)) * D * 1.04]);
+  }
+  L.strand(pts, [1, 0.62, 0.85], 0.3, 1.6, 0);
+  return L.geometry();
+}

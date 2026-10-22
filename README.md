@@ -10,6 +10,10 @@ Aesthetic reference: connectome-style light on pure black, an elegant serif, a c
 - **Reversal** (top right): a live lab. An early clone is simulated while you change five habits and watch it fade or grow. Below it, what contributes to prevention and reversal, with evidence strength and sources.
 - **Genetics** (top right): BRCA1 and BRCA2 on a glowing DNA helix, lifetime risk in carriers, other risk genes, options such as MRI, risk-reducing surgery and olaparib, and preventive genomics.
 
+- **Self-check** (top right): know your normal, look, feel, when to report, and links to official self-exam videos from the NHS, the National Breast Cancer Foundation and Susan G. Komen. Paste an official embed URL into `VIDEO_EMBED` in `src/content/selfcheck.js` to play one inline.
+
+Every section has its own shareable address (`#journey`, `#reversal`, `#genetics`, `#self-check`, plus a stage such as `#journey/5`).
+
 Each stage has a "Learn more" sheet with PubMed and DOI links for the studies behind it.
 
 ## Evidence policy
@@ -57,3 +61,15 @@ tests/       node:test suite
 ```
 
 The engine is organ-agnostic in spirit: new organs mean a new state model, anatomy generator and evidence registry.
+
+## Launch
+
+```bash
+npm install && npm test && SITE_URL=https://your-domain npm run build   # static site in dist/
+```
+
+- **Vercel (recommended):** import the repository, framework Vite, no settings needed. Set `SITE_URL` as an environment variable so social previews use the full address.
+- **GitHub Pages:** `.github/workflows/pages.yml` builds and deploys on merge to `main`. Enable Pages with source "GitHub Actions" and set the repository variable `SITE_URL`.
+- The site is fully static, sets no cookies and collects no data.
+
+Credit shown in the footer: developed by Dr. Siddharth Narayanan.

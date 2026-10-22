@@ -1,54 +1,53 @@
 import React, { useState } from 'react';
-import { CONTRIBUTORS, REVERSAL_INTRO, STRENGTH } from '../content/reversal.js';
+import { CONTRIBUTORS, STRENGTH } from '../content/reversal.js';
 import { SourceList } from './Story.jsx';
+import { HABITS, levelEffect } from '../content/habits.js';
 
-export const HABITS = [
-  { id: 'drink', name: 'Drinks', levels: ['none', '1 a day', '2+ a day'], map: [{ alcohol: 0 }, { alcohol: 14 }, { alcohol: 28 }] },
-  { id: 'move', name: 'Movement', levels: ['couch', 'walk', 'active'], map: [{ activity: 2 }, { activity: 12 }, { activity: 30 }] },
-  { id: 'weight', name: 'Weight', levels: ['lean', 'average', 'heavy'], map: [{ bmi: 22 }, { bmi: 27 }, { bmi: 33 }] },
-  { id: 'plate', name: 'Plate', levels: ['junk', 'mixed', 'plants'], map: [{ fiber: 10, soy: 0 }, { fiber: 18, soy: 15 }, { fiber: 35, soy: 45 }] },
-  { id: 'scan', name: 'Scans', levels: ['none', 'every 2y', 'yearly'], map: [{ screening: 0 }, { screening: 1 }, { screening: 2 }] },
-];
+export { HABITS, levelEffect };
 
-export function ReversalPanel({ lab, habits, onHabit, onRestart, onTogglePlay }) {
-  const [open, setOpen] = useState(null);
-  const shrink = lab && lab.prolifRel < 0.97;
+const tone = (v) => (v == null ? '' : v < 0.97 ? 'good' : v > 1.03 ? 'bad' : '');
+const clamp = (v) => Math.min(1, Math.max(0, v));
+
+function biggestLever(habits) {
+  const best = { drink: 0, move: 2, weight: 0 };
+  let pick = null, gain = 0.03;
+  for (const id of Object.keys(best)) {
+    const h = HABITS.find((x) => x.id === id);
+    const g = 1 - levelEffect(h, best[id]).v / levelEffect(h, habits[id]).v;
+    if (g > gain) { gain = g; pick = { h, g, to: best[id] }; }
+  }
+  return pick;
+}
+
+export function takeaway(lab, habits) {
+  if (!lab) return '';
+  if (lab.total < 0.05) return 'The early clone has faded. Healthy cells won back the space.';
+  if (lab.x[3] + lab.x[4] > 0.05) return 'This clone has become cancer. Habits no longer make it fade in this model. It needs treatment. Press Restart to try again.';
+  if (lab.prolifRel < 0.97) return 'Growth pressure is below the line, so the early clone is fading.';
+  const pick = biggestLever(habits);
+  if (pick) return `Growth pressure is above the line. Biggest lever: ${pick.h.name.toLowerCase()}. Choosing "${pick.h.levels[pick.to]}" lowers risk about ${Math.round(pick.g * 100)}%${pick.h.id === 'weight' ? ' (model guess)' : ''}.`;
+  return 'Growth pressure is above the line. Try moving the levers toward the first option in each card.';
+}
+
+function Meter({ label, value, pct, line, toneName, note }) {
   return (
-    <div className="reversal">
-      <div className="top-copy">
-        <span className="count mono">REVERSAL <i>and prevention</i></span>
-        <h2 className="caption">{REVERSAL_INTRO.caption}</h2>
-      </div>
+    <div className="meter">
+      <div className="meter-head mono"><span>{label}</span><b className={toneName}>{value}</b></div>
+      <div className={`bar ${toneName}`}><i style={{ width: `${Math.round(pct * 100)}%` }} /><u style={{ left: `${line * 100}%` }} /></div>
+      <span className={`meter-note mono ${toneName}`}>{note}</span>
+    </div>
+  );
+}
 
-      <section className="drawer" aria-label="Reversal lab">
-        <p className="body">{REVERSAL_INTRO.body}</p>
-
-        <div className="readout mono" aria-live="polite">
-          <span>AGE <b>{lab ? Math.floor(lab.age) : 45}</b></span>
-          <span>GROWTH <b className={shrink ? 'ok' : 'bad'}>{lab ? Math.round(lab.prolifRel * 100) : 100}%</b></span>
-          <span>RISK <b>x{lab ? lab.mult.total.toFixed(2) : '1.00'}</b></span>
-          <span className={`state ${shrink ? 'ok' : 'bad'}`}>{!lab ? '' : lab.total < 0.05 ? 'CLONE FADED' : shrink ? 'SHRINK ZONE' : lab.x[4] > 0.05 ? 'INVASIVE' : 'GROWING'}</span>
-        </div>
-
-        <div className="lab-controls">
-          <button className="pill" onClick={onTogglePlay}>{lab?.playing ? 'Pause' : 'Play'}</button>
-          <button className="pill" onClick={onRestart}>Restart</button>
-        </div>
-
-        <div className="habit-rows">
-          {HABITS.map((h) => (
-            <div className="habit" key={h.id}>
-              <span className="mono">{h.name}</span>
-              <div className="seg" role="radiogroup" aria-label={h.name}>
-                {h.levels.map((l, i) => (
-                  <button key={l} role="radio" aria-checked={habits[h.id] === i} className={habits[h.id] === i ? 'on' : ''} onClick={() => onHabit(h, i)}>{l}</button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <h3 className="mono eyebrow">What contributes</h3>
+export function EvidenceSheet({ onClose }) {
+  const [open, setOpen] = useState(null);
+  return (
+    <div className="sheet-wrap" onClick={onClose}>
+      <aside className="sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="What contributes to prevention">
+        <header>
+          <div><span className="mono eyebrow">Evidence</span><h3>What contributes</h3></div>
+          <button className="pill" onClick={onClose} aria-label="Close">Close</button>
+        </header>
         <ul className="contrib">
           {CONTRIBUTORS.map((c) => (
             <li key={c.id} className={open === c.id ? 'open' : ''}>
@@ -65,7 +64,72 @@ export function ReversalPanel({ lab, habits, onHabit, onRestart, onTogglePlay })
             </li>
           ))}
         </ul>
-        <p className="note">Early clones can fade when their surroundings change. In this model, in situ and invasive cancers do not regress through lifestyle and need treatment. Associations from population studies cannot predict one person's outcome.</p>
+        <p className="note">Early clones can fade when their surroundings change. In this model, in situ and invasive cancers do not regress through lifestyle and need treatment. Associations from population studies describe groups and cannot predict one person's outcome.</p>
+      </aside>
+    </div>
+  );
+}
+
+export function ReversalPanel({ lab, habits, onHabit, onRestart, onTogglePlay, onEvidence }) {
+  const [collapsed, setCollapsed] = useState(false);
+  const risk = lab ? lab.mult.total : 1;
+  const rPct = clamp((Math.log2(Math.max(0.01, risk)) + 1) / 3);
+  const rTone = risk < 0.95 ? 'good' : risk < 1.05 ? '' : risk < 1.3 ? 'warn' : 'bad';
+  const g = lab ? lab.prolifRel : 1;
+  const gPct = clamp((g - 0.8) / 0.8);
+  const gLine = (0.97 - 0.8) / 0.8;
+  const shrink = g < 0.97;
+  const faded = lab && lab.total < 0.05;
+  const gTone = faded || shrink ? 'good' : g < 1.1 ? '' : g < 1.3 ? 'warn' : 'bad';
+  return (
+    <div className="reversal">
+      <div className="top-copy">
+        <span className="count mono">REVERSAL <i>and prevention</i></span>
+        <h2 className="caption">what lets the light return</h2>
+      </div>
+
+      <section className={`dock ${collapsed ? 'collapsed' : ''}`} aria-label="Risk factors">
+        <header className="dock-head">
+          <span className="mono age">AGE <b>{lab ? Math.floor(lab.age) : 45}</b></span>
+          <button className="pill" onClick={onTogglePlay}>{lab?.playing ? 'Pause' : 'Play'}</button>
+          <button className="pill" onClick={onRestart}>Restart</button>
+          <button className="pill ghost" onClick={() => setCollapsed(!collapsed)} aria-expanded={!collapsed}>{collapsed ? 'Show controls' : 'Hide'}</button>
+        </header>
+
+        <div className="meters">
+          <Meter label="NEW CLONES" value={`x${risk.toFixed(2)}`} pct={rPct} line={1 / 3} toneName={rTone}
+            note={risk < 0.95 ? 'LOWER THAN BASELINE' : risk < 1.05 ? 'BASELINE' : risk < 1.3 ? 'A BIT HIGHER' : 'HIGH'} />
+          <Meter label="EARLY CLONE" value={faded ? 'FADED' : `${Math.round(g * 100)}%`} pct={gPct} line={gLine} toneName={gTone}
+            note={faded ? 'HEALTHY CELLS WON' : shrink ? 'SHRINK ZONE' : g < 1.1 ? 'STEADY' : 'GROWING'} />
+        </div>
+
+        {!collapsed && (
+          <>
+            <p className="takeaway" aria-live="polite">{takeaway(lab, habits)}</p>
+            <div className="cards">
+              {HABITS.map((h) => (
+                <div className="hcard" key={h.id}>
+                  <div className="hcard-top"><b>{h.name}</b><span>{h.hint}</span></div>
+                  <div className="seg" role="radiogroup" aria-label={h.name}>
+                    {h.levels.map((l, i) => {
+                      const e = levelEffect(h, i);
+                      return (
+                        <button key={l} role="radio" aria-checked={habits[h.id] === i} className={habits[h.id] === i ? 'on' : ''} onClick={() => onHabit(h, i)}>
+                          <span>{l}</span>
+                          <small className={tone(e.v)}>{e.v == null ? e.text : `x${e.v.toFixed(2)} ${e.text}`}</small>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="dock-foot">
+              <button className="pill" onClick={onEvidence}>Evidence and sources</button>
+              <span className="note">Swipe the cards. Multipliers are relative to a baseline of no alcohol, a walk, a steady weight.</span>
+            </div>
+          </>
+        )}
       </section>
     </div>
   );

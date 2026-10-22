@@ -23,6 +23,7 @@ export const filamentVertex = /* glsl */ `
   uniform float uOpacity;
   uniform float uGene;
   uniform float uHair;
+  uniform float uRisk;
   varying vec3 vCol;
   varying float vAlpha;
 
@@ -38,7 +39,10 @@ export const filamentVertex = /* glsl */ `
     float d = distance(p, uLesionPos);
     float k = uLesionOn * smoothstep(uLesionR * 2.6, uLesionR * 0.5, d);
     base = mix(base, uLesionCol, k);
-    float alpha = aA * uOpacity * (1.0 + k * 1.8);
+    float rk = clamp(uRisk, -1.0, 1.0);
+    base = mix(base, vec3(1.0, 0.42, 0.30), max(rk, 0.0) * 0.5);
+    base = mix(base, vec3(0.5, 1.0, 0.85), max(-rk, 0.0) * 0.3);
+    float alpha = aA * uOpacity * (1.0 + k * 1.8) * (1.0 - 0.25 * max(rk, 0.0) + 0.2 * max(-rk, 0.0));
 
     if (uFocusR > 0.0) alpha *= smoothstep(uFocusR * 1.6, uFocusR * 0.45, distance(p, uFocusPos));
     if (uExcise > 0.0) alpha *= 1.0 - uExcise * smoothstep(uExciseR * 1.02, uExciseR * 0.92, d);
@@ -221,9 +225,14 @@ export const fxVertex = /* glsl */ `
     } else if (uMode < 2.5) {
       p = uCenter + position * uR;
       a = uAmt * step(0.5, fract(aT * 12.0 + uTime * 0.25)) * 0.9;
-    } else {
+    } else if (uMode < 3.5) {
       float run = pow(max(0.0, sin((aT * 2.6 - uTime * 1.6 + aSeed * 6.0) * 3.14159)), 4.0);
       a = uAmt * (0.12 + run * 1.3);
+    } else {
+      float head = fract(uTime * 0.1) * 1.15;
+      float tail = smoothstep(head - 0.3, head, aT) * (1.0 - step(head, aT));
+      float tip = pow(max(0.0, 1.0 - abs(aT - head) * 40.0), 2.0);
+      a = uAmt * (0.12 * (1.0 - step(head, aT)) + tail * 0.9 + tip * 2.0);
     }
     vCol = col;
     vAlpha = a;

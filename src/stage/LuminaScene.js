@@ -5,7 +5,7 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import {
   buildBody, buildGland, buildLesion, buildTendrils, buildLymph, buildNodePoints, buildSparks, buildDrug, buildDust,
-  buildScanner, buildNeedle, buildRing, buildBeams, buildHelix, LESION_POS, BREAST_C, AFFECTED_SIDE,
+  buildScanner, buildNeedle, buildRing, buildBeams, buildHelix, buildSpiral, LESION_POS, BREAST_C, AFFECTED_SIDE,
 } from './geometry.js';
 import {
   filamentVertex, lineFragment, lesionVertex, tendrilVertex, lymphVertex, pointVertex, pointFragment, fxVertex,
@@ -23,7 +23,7 @@ export const STAGE_COLORS = {
 const BASE_FX = {
   lesionAmt: 0, lesionR: 0.02, lesionCol: STAGE_COLORS.gold, jit: 0.3, core: 0.2, sparks: 0, tend: 0, tendScale: 1, spread: 0,
   nodeHot: 0, nodeOut: 0, scan: 0, needle: 0, ring: 0, ringR: 0.05, beams: 0, drug: 0, excise: 0, exciseR: 0.05, tintOn: 1,
-  body: 1, gland: 1, helix: 0, focusR: -1, gene: -1,
+  body: 1, gland: 1, helix: 0, focusR: -1, gene: -1, risk: 0, spiral: 0,
 };
 
 // Camera framing: look at `target`, fit `width` x `height` world units, from direction `dir`.
@@ -33,6 +33,7 @@ const CAM = {
   lesion: { target: [LESION_POS[0], LESION_POS[1], LESION_POS[2]], width: 0.24, height: 0.2, dir: [-0.3, 0.12, 1], shiftY: 0.06 },
   nodes: { target: [-0.26, 0.76, 0.07], width: 0.5, height: 0.4, dir: [-0.35, 0.08, 1], shiftY: 0.06 },
   helix: { target: [0, 0, 0], width: 0.9, height: 2.9, dir: [0, 0.02, 1], shiftY: 0.08 },
+  chest: { target: [0, 0.66, 0.12], width: 0.78, height: 0.46, dir: [0, 0.06, 1], shiftY: 0.06 },
 };
 
 export const PRESETS = {
@@ -50,6 +51,11 @@ export const PRESETS = {
   after: { cam: CAM.breast, fx: { body: 0.3, gland: 1.15, focusR: 0.7, nodeOut: 1 } },
   reversal: { cam: { ...CAM.lesion, shiftY: 0.2 }, fx: { body: 0.1, focusR: 0.42, lesionAmt: 0.3, lesionR: 0.02 } },
   genetics: { cam: CAM.helix, fx: { body: 0, gland: 0, helix: 1, focusR: -1 } },
+  know: { cam: CAM.chest, fx: { body: 0.5, gland: 1.1, focusR: 0.8 } },
+  look: { cam: CAM.chest, fx: { body: 0.5, gland: 1.15, focusR: 0.8 } },
+  feel: { cam: CAM.breast, fx: { body: 0.3, gland: 1, spiral: 1, focusR: 0.7 } },
+  act: { cam: CAM.lesion, fx: { body: 0.3, lesionAmt: 0.3, lesionR: 0.012, lesionCol: STAGE_COLORS.gold, jit: 0.2, sparks: 0.12, focusR: 0.55 } },
+  watch: { cam: CAM.chest, fx: { body: 0.7, gland: 1, focusR: 0.9 } },
 };
 
 export class LuminaScene {
@@ -112,6 +118,7 @@ export class LuminaScene {
       uFocusPos: { value: V3(CAM.body.target) },
       uFocusR: { value: -1 },
       uGene: { value: -1 },
+      uRisk: { value: 0 },
     };
   }
 
@@ -154,12 +161,14 @@ export class LuminaScene {
     this.drug = points(buildDrug(), this.mat(pointVertex, pointFragment, this.uDrug));
     this.dust = points(buildDust(), this.mat(pointVertex, pointFragment, this.uDust));
 
-    const fx = (mode) => ({ uMode: { value: mode }, uAmt: { value: 0 }, ...center, uR: { value: 0.05 }, uCol: { value: new THREE.Vector3(...[[0.42, 0.89, 1], [1, 1, 1], [1, 0.62, 0.82], [0.6, 0.92, 1]][mode]) } });
-    this.uScan = fx(0); this.uNeedle = fx(1); this.uRing = fx(2); this.uBeams = fx(3);
+    const fx = (mode) => ({ uMode: { value: mode }, uAmt: { value: 0 }, ...center, uR: { value: 0.05 }, uCol: { value: new THREE.Vector3(...[[0.42, 0.89, 1], [1, 1, 1], [1, 0.62, 0.82], [0.6, 0.92, 1], [1, 0.62, 0.85]][mode]) } });
+    this.uScan = fx(0); this.uNeedle = fx(1); this.uRing = fx(2); this.uBeams = fx(3); this.uSpiral = fx(4);
+    this.uSpiral.uCol.value.set(1, 0.62, 0.85);
     this.scan = lines(buildScanner(), this.mat(fxVertex, lineFragment, this.uScan));
     this.needle = lines(buildNeedle(), this.mat(fxVertex, lineFragment, this.uNeedle));
     this.ring = lines(buildRing(), this.mat(fxVertex, lineFragment, this.uRing));
     this.beams = lines(buildBeams(), this.mat(fxVertex, lineFragment, this.uBeams));
+    this.spiral = lines(buildSpiral(), this.mat(fxVertex, lineFragment, this.uSpiral));
   }
 
   // ---- control ---------------------------------------------------------------
@@ -283,6 +292,9 @@ export class LuminaScene {
     this.ring.visible = f.ring > 0.01;
     this.uBeams.uAmt.value = f.beams;
     this.beams.visible = f.beams > 0.01;
+    this.uSpiral.uAmt.value = f.spiral;
+    this.spiral.visible = f.spiral > 0.01;
+    this.u.uRisk.value = f.risk;
 
     // camera: critically damped approach, gentle sway and pointer parallax
     this.pointerS.lerp(this.pointer, k(2));
