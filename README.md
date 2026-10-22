@@ -1,18 +1,16 @@
-# Pathoclones
+# Luminara: Breast Cancer Awareness Month
 
-Interactive, evidence-linked organ models for clinical learning. The first model is the **breast**, built for Breast Cancer Awareness Month.
+A luminous, filament-style journey through breast cancer. A woman's silhouette is drawn in glowing strands. The camera flies into the breast and follows a cancer stage by stage, then through treatment, then to what can reverse it and what genes say.
 
-A pixel-art game on top of an evidence-linked simulation. Each tile on the board is a lobule of breast tissue. A clone of abnormal cells grows from one tile, colour-coded by stage (blue normal, gold hyperplasia, orange atypia, magenta DCIS, crimson invasive). Your habits change how fast it grows or whether it fades.
+Aesthetic reference: connectome-style light on pure black, an elegant serif, a coloured italic verb per stage and lime mono stats.
 
-## How it plays
+## Views
 
-- Pick a level (Rookie, Warrior, Legend) and press play. One simulated year passes every second or so.
-- Five habit cards: drinks, movement, weight, plate (fiber and soy) and scans. Change them at any time.
-- **Risk radar:** one bar for how likely new clones are, one for growth pressure. When growth pressure drops below the line, early clones enter the shrink zone and can fade.
-- **Tumor growth ladder:** tile counts per stage, with tumor size in mm once invasive.
-- **Life chart:** bars for clone size over age, dots for your evolving risk.
-- Points reward healthy years, the shrink zone, clones that fade and early detection. Late detection and spread cost points. Each level ends with a grade.
-- Every habit has a `?` button with a plain-language reason and the PubMed sources behind it.
+- **Journey** (11 stages, tap, swipe or use the arrow keys): healthy tissue, hyperplasia, atypia, DCIS, invasive cancer, lymph node spread, screening and diagnosis, surgery, radiation, systemic therapy, survivorship.
+- **Reversal** (top right): a live lab. An early clone is simulated while you change five habits and watch it fade or grow. Below it, what contributes to prevention and reversal, with evidence strength and sources.
+- **Genetics** (top right): BRCA1 and BRCA2 on a glowing DNA helix, lifetime risk in carriers, other risk genes, options such as MRI, risk-reducing surgery and olaparib, and preventive genomics.
+
+Each stage has a "Learn more" sheet with PubMed and DOI links for the studies behind it.
 
 ## Evidence policy
 
@@ -52,7 +50,9 @@ npm run build
 ```
 src/sim/     engine, RNG, timeline controller, cohort runner
 src/data/    evidence registry (PubMed-verified)
-src/game/    levels, scoring rules, pixel board, pixel nebula, UI components
+src/stage/   filament geometry, shaders, Three.js scene and camera choreography
+src/content/ journey, reversal and genetics copy
+src/ui/      story and reversal panels
 tests/       node:test suite
 ```
 

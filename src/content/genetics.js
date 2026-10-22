@@ -1,0 +1,82 @@
+import { TONES } from './journey.js';
+
+// The genetics story. `gene` picks which stretch of the helix glows.
+export const GENE_STEPS = [
+  {
+    id: 'code',
+    gene: -1,
+    caption: 'the instructions',
+    verb: 'repair',
+    tone: TONES.violet,
+    stats: [['GENES', 'BRCA1 · BRCA2'], ['JOB', 'FIX BROKEN DNA']],
+    clinical: 'Guardian genes',
+    body: 'BRCA1 and BRCA2 help repair breaks in DNA every day. A person born with a harmful variant in one copy repairs less well, so mistakes can pile up in breast, ovarian and other cells.',
+    more: [
+      'These are inherited from either parent, and a parent can be a father.',
+      'Most breast cancers are not caused by an inherited variant. Family history is the clue that raises the question.',
+    ],
+    sources: [],
+  },
+  {
+    id: 'odds',
+    gene: 1,
+    caption: 'the odds, drawn',
+    verb: 'inherit',
+    tone: TONES.pink,
+    stats: [['BRCA1 TO AGE 80', '72%'], ['BRCA2 TO AGE 80', '69%']],
+    clinical: 'Lifetime breast cancer risk in carriers',
+    body: 'In a large prospective study, about 72 in 100 BRCA1 carriers and 69 in 100 BRCA2 carriers developed breast cancer by age 80. Ovarian cancer risk was 44% for BRCA1 and 17% for BRCA2. Risk rose with the number of affected relatives.',
+    more: [
+      'These are population estimates for carriers. They are not a prediction for one person.',
+      'Having a variant is not a diagnosis. It is information that opens options.',
+    ],
+    sources: ['kuchenbaecker2017'],
+  },
+  {
+    id: 'others',
+    gene: 3,
+    caption: 'other guardians',
+    verb: 'widen',
+    tone: TONES.cyan,
+    stats: [['CLEAR LINKS', 'ATM · BRCA1 · BRCA2'], ['', 'CHEK2 · PALB2']],
+    clinical: 'Beyond BRCA',
+    body: 'Testing more than 100,000 women showed five genes with clear breast cancer links: ATM, BRCA1, BRCA2, CHEK2 and PALB2. For most of the other genes on common panels, the added risk looked modest.',
+    more: [
+      'The results help counselors explain which findings matter and which are less certain.',
+      'Variants of uncertain significance are common. They are not a reason for surgery.',
+    ],
+    sources: ['dorling2021'],
+  },
+  {
+    id: 'options',
+    gene: 2,
+    caption: 'knowing early',
+    verb: 'prevent',
+    tone: TONES.lime,
+    stats: [['MASTECTOMY', '0 OF 247 CANCERS'], ['WITHOUT', '98 OF 1,372']],
+    clinical: 'Options for carriers',
+    body: 'Carriers can choose closer screening with MRI, risk-lowering medicine, or risk-reducing surgery. In one cohort, no breast cancers occurred in 247 women after preventive mastectomy, versus 98 of 1,372 women without it. Removing the ovaries and tubes lowered ovarian cancer risk and mortality.',
+    more: [
+      'Each option has trade-offs for body image, fertility, menopause and mental health.',
+      'If a carrier does develop cancer, targeted drugs such as olaparib may be offered.',
+      'A genetic counselor and a breast specialist can lay out timing and choices.',
+    ],
+    sources: ['domchek2010', 'olympia2021'],
+  },
+  {
+    id: 'genomics',
+    gene: -1,
+    caption: 'knowledge that travels',
+    verb: 'share',
+    tone: TONES.gold,
+    stats: [['START WITH', 'FAMILY STORY'], ['THEN', 'TEST RELATIVES']],
+    clinical: 'Preventive genomics',
+    body: 'It starts with a family story: breast, ovarian, prostate or pancreatic cancers, or diagnoses at a young age. A positive result is a map for relatives, who can be tested for the same variant. Scores that add up many small genetic effects are still moving from research into routine care.',
+    more: [
+      'Genetic counselors explain what a result does and does not mean, before and after testing.',
+      'Many places protect people from genetic discrimination in health insurance and employment. Ask what applies locally.',
+      'Genes are one factor. Habits and screening still matter for carriers and non-carriers.',
+    ],
+    sources: [],
+  },
+];
