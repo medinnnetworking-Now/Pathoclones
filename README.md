@@ -72,4 +72,4 @@ npm install && npm test && SITE_URL=https://your-domain npm run build   # static
 - **GitHub Pages:** `.github/workflows/pages.yml` builds and deploys on merge to `main`. Enable Pages with source "GitHub Actions" and set the repository variable `SITE_URL`.
 - The site is fully static, sets no cookies and collects no data.
 
-Credit shown in the footer: developed by Dr. Siddharth Narayanan.
+Credit shown in the footer: developed by Dr. Sidharth Narayanan.

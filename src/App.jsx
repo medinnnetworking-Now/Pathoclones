@@ -9,7 +9,7 @@ import { Story, MoreSheet } from './ui/Story.jsx';
 import { ReversalPanel, EvidenceSheet, HABITS } from './ui/Reversal.jsx';
 
 const BRAND = 'Luminara';
-const CREDIT = 'developed by Dr. Siddharth Narayanan';
+const CREDIT = 'developed by Dr. Sidharth Narayanan';
 const LAB_START = { drink: 1, move: 1, weight: 1, plate: 1, scan: 1 };
 
 const SECTIONS = [
